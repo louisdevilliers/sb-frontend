@@ -1,12 +1,12 @@
 import React from 'react';
 import { Typography, Container } from '@mui/material';
-import { kleureTableConfig } from '../../utility/entityTableConfig';
+import { faktureTableConfig } from '../../utility/entityTableConfig';
 import {EntityTable} from '../common/EntityTable'
 
-const KleureTable = ({ data, page, rowsPerPage, handleChangePage, handleChangeRowsPerPage }) => {
+const FaktureTable = ({ data, page, rowsPerPage, handleChangePage, handleChangeRowsPerPage }) => {
   return (
     <EntityTable
-      columns={kleureTableConfig.columns}
+      columns={faktureTableConfig.columns}
       data={data}
       page={page}
       rowsPerPage={rowsPerPage}
@@ -16,4 +16,4 @@ const KleureTable = ({ data, page, rowsPerPage, handleChangePage, handleChangeRo
   );
 };
 
-export default KleureTable;
+export default FaktureTable;

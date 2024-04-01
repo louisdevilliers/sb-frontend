@@ -1,9 +1,27 @@
 import KleureForm from '../components/forms/KleureForm';
-// Import other entity forms as they are created
+import KultivarsForm from '../components/forms/KultivarsForm';
+import BokseForm from '../components/forms/BokseForm';
+import MarkteForm from '../components/forms/MarkteForm';
+import PlekkeForm from '../components/forms/PlekkeForm';
+import ProdusenteForm from '../components/forms/ProdusenteForm';
+import TipesForm from '../components/forms/TipesForm';
+import VerpakkingsForm from '../components/forms/VerpakkingsForm';
+import VervoerdersForm from '../components/forms/VervoerdersForm';
+import WekeForm from '../components/forms/WekeForm';
+
 
 const entityFormMapping = {
   kleure: KleureForm,
-  // Add other entity forms here, e.g., 'entityName': EntityNameForm,
+  kultivars: KultivarsForm,
+  bokse: BokseForm,
+  markte: MarkteForm,
+  plekke: PlekkeForm,
+  produsente: ProdusenteForm,
+  tipes: TipesForm,
+  verpakkings: VerpakkingsForm,
+  vervoerders: VervoerdersForm,
+  weke: WekeForm,
+  
 };
 
 export default entityFormMapping;

@@ -3,21 +3,39 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardActions, Button, Grid, Typography } from '@mui/material';
 
-// Example data for entities, you might fetch this from an API in a real app
+// call from api.. later
 const entities = [
- // { name: 'Bokse', path: 'bokse' },
+  { name: 'Bokse', path: 'bokse' },
   { name: 'Kleure' , path: 'kleure'},
- // { name: 'Kultivars', path: 'kultivars'},
-  //{ name: 'Stapels', path: 'stapels' },
-  //{ name: 'Palette', path: 'palette' },
+  { name: 'Kultivars', path: 'kultivars'},
+  { name: 'Stacks', path: 'stacks' },
+  { name: 'Palette', path: 'palette' },
+  { name: 'Fakture', path: 'fakture' },
+  { name: 'Loads', path: 'loads' },
+  { name: 'Markte', path: 'markte' },
+  { name: 'Plekke', path: 'plekke' },
+  { name: 'Produsente', path: 'produsente' },
+  { name: 'Pryse', path: 'pryse' },
+  { name: 'Roetes', path: 'roetes' },
+  { name: 'Tipes', path: 'tipes' },
+  { name: 'Transaksies', path: 'transaksies' },
+  { name: 'Uitlaaie', path: 'uitlaaie' },
+  { name: 'Verkopes', path: 'verkopes' },
+  { name: 'Verpakkings', path: 'verpakkings' },
+  { name: 'Vervoerders', path: 'vervoerders' },
+  { name: 'Vragte', path: 'vragte' },
+  { name: 'Weke', path: 'weke' },
   // ...add other entities
 ];
 
 export default function Homepage() {
+
   const navigate = useNavigate();
+  
   const handleNavigate = (entityPath, action) => {
     navigate(`/${entityPath}/${action}`);
   };
+
   return (
     <Grid container spacing={4}>
       {entities.map((entity) => (
