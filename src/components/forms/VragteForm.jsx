@@ -9,10 +9,11 @@ import {
   Typography,
   TextField,
   Box,
-  Grid,
 } from "@mui/material";
+import { Grid } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import * as Yup from "yup";
+import { fetchEntityDropdownData } from "../../services/entityService";
 
 const VragteForm = ({ onSubmit }) => {
   const [produsente, setProdusente] = useState([]);
@@ -23,36 +24,40 @@ const VragteForm = ({ onSubmit }) => {
   const [faktuurCreated, setFaktuurCreated] = useState(false);
 
   useEffect(() => {
-    const fetchData = async (url, setter, dataName) => {
+    const fetchDropdownData = async () => {
       try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Network response was not ok");
-        const data = await response.json();
-        console.log(`Fetched ${dataName}:`, data);
-        Array.isArray(data)
-          ? setter(data)
-          : console.error(`Fetched ${dataName} is not an array:`, data);
+        const fetchedProdusente = await fetchEntityDropdownData("produsente");
+        setProdusente(fetchedProdusente);
+
+        const fetchedKultivars = await fetchEntityDropdownData("kultivars");
+        setKultivars(fetchedKultivars);
+
+        const fetchedBokse = await fetchEntityDropdownData("bokse");
+        setBokse(fetchedBokse);
+
+        const fetchedWeke = await fetchEntityDropdownData("weke");
+        setWeke(fetchedWeke);
       } catch (error) {
-        console.error(`Error fetching ${dataName}:`, error);
+        console.error("Error fetching dropdown data:", error);
       }
     };
 
-    fetchData(
-      "http://localhost:8080/api/produsente/list",
-      setProdusente,
-      "produsente"
-    );
-    fetchData("http://localhost:8080/api/vragte/list", setVragte, "vragte");
-    fetchData(
-      "http://localhost:8080/api/kultivars/list",
-      setKultivars,
-      "kultivars"
-    );
-    fetchData("http://localhost:8080/api/bokse/list", setBokse, "bokse");
-    fetchData("http://localhost:8080/api/weke/list", setWeke, "weke");
+    fetchDropdownData();
   }, []);
 
-  // Add a vragte field
+  // Add a vrag qty field
+  /*
+  const addVragField = () => {
+    setVragte([...vragte, { produsentId: '', kultivarId: '', boksId: '', qty: '' }]);
+  };
+  
+  // Function to remove load fields
+  const removeVragField = (index) => {
+    const newVragte = [...vragte];
+    newVragte.splice(index, 1);
+    setVragte(newVragte);
+  };
+  */
   const addVragteField = () => {
     const newVragte = formik.values.vragte.concat({
       produsentId: "",
@@ -71,8 +76,11 @@ const VragteForm = ({ onSubmit }) => {
 
   // Handle form submission for "CREATE FAKTUUR"
   const handleCreateFaktuur = () => {
+    // Assuming validation has passed and faktuur is created
     setFaktuurCreated(true);
   };
+
+  // Function to handle change on load fields
 
   // Formik initialization
   const formik = useFormik({
@@ -97,7 +105,7 @@ const VragteForm = ({ onSubmit }) => {
       ),
     }),
     onSubmit: (values) => {
-      console.log(values);
+      console.log("values", values);
       onSubmit(values);
     },
   });
@@ -152,12 +160,16 @@ const VragteForm = ({ onSubmit }) => {
           type="button"
           variant="contained"
           color="primary"
-          onClick={handleCreateFaktuur}
+          onClick={() => {
+            handleCreateFaktuur();
+          }}
         >
           CREATE FAKTUUR
         </Button>
       </Box>
 
+      {/* Render the rest of the form elements after "CREATE FAKTUUR" is clicked */}
+      {/*second section, after clicking crete faktuur faktuur nommer shows where field was, fields for adding vragte appears: row of inputs, produsente select, kultivar select, boks select, qty input, delete field, next row add field button for new vrag*/}
       {faktuurCreated && (
         <>
           <Typography variant="h6" sx={{ mt: 4 }}>
@@ -165,12 +177,18 @@ const VragteForm = ({ onSubmit }) => {
           </Typography>
 
           {formik.values.vragte.map((vrag, index) => (
+            /*
+            <Box
+              key={index}
+              sx={{ display: "flex", alignItems: "center", gap: 2, mt: 2 }}
+            >
+            */
             <Grid
               container
               spacing={2}
               alignItems="center"
               key={index}
-              sx={{ mt: 2 }}
+              sx={{ mt: 1 }}
             >
               <Grid item xs={12} sm={3}>
                 <FormControl fullWidth>
@@ -180,7 +198,7 @@ const VragteForm = ({ onSubmit }) => {
                   <Select
                     labelId={`produsent-label-${index}`}
                     id={`produsent-${index}`}
-                    name={`vragte[${index}].produsentId`}
+                    name={`produsent-${index}`}
                     value={vrag.produsentId}
                     onChange={(e) =>
                       formik.setFieldValue(
@@ -225,9 +243,12 @@ const VragteForm = ({ onSubmit }) => {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12} sm={2}>
+              {/* Boks Select Input */}
+              <Grid item xs={6} sm={2}>
                 <FormControl fullWidth>
-                  <InputLabel id={`boks-label-${index}`}>Boks</InputLabel>
+                  <InputLabel id={`boks-label-${index}`} sx={{ width: 150 }}>
+                    Boks
+                  </InputLabel>
                   <Select
                     labelId={`boks-label-${index}`}
                     id={`boks-${index}`}
@@ -250,7 +271,8 @@ const VragteForm = ({ onSubmit }) => {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={12} sm={2}>
+              {/* Quantity Input */}
+              <Grid item xs={6} sm={2}>
                 <TextField
                   id={`qty-${index}`}
                   name={`vragte[${index}].qty`}
@@ -261,26 +283,18 @@ const VragteForm = ({ onSubmit }) => {
                     formik.setFieldValue(`vragte[${index}].qty`, e.target.value)
                   }
                   size="small"
+                  //sx={{ width: 150 }}
                 />
               </Grid>
-              <Grid item xs={12} sm={2}>
-                <Button
-                  type="button"
-                  color="secondary"
-                  onClick={() => removeVragteField(index)}
-                >
+              <Grid item xs={1} sm={1}>
+                <Button onClick={() => removeVragteField(index)}>
                   <DeleteIcon />
                 </Button>
               </Grid>
             </Grid>
           ))}
 
-          <Button
-            type="button"
-            onClick={addVragteField}
-            sx={{ mt: 2 }}
-            variant="outlined"
-          >
+          <Button onClick={addVragteField} sx={{ mt: 2 }}>
             + ADD FIELD
           </Button>
           <Box>

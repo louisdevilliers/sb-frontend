@@ -13,7 +13,6 @@ import {
   Grid,
   Select,
   MenuItem,
-  InputAdornment,
   IconButton,
   Paper,
 } from "@mui/material";
@@ -71,11 +70,7 @@ const validationSchema = Yup.object({
 
 const PaletteForm = ({ onSubmit }) => {
   const [palletNumber, setPalletNumber] = useState("");
-  const [location, setLocation] = useState("vloer");
-  const [selectedStack, setSelectedStack] = useState("");
-  const [boxCount, setBoxCount] = useState("");
   const [stacks, setStacks] = useState(dummyStacks);
-  const [selectedStacks, setSelectedStacks] = useState([]);
   const [showSections, setShowSections] = useState(false);
 
   const formik = useFormik({
@@ -85,10 +80,16 @@ const PaletteForm = ({ onSubmit }) => {
       stacks: [],
     },
     validationSchema: validationSchema,
+    onSubmit: (values) => {
+      // Pass the form data up to the parent component
+      console.log("Palette Form submitted, in formik handler. Values:");
+      console.log(values);
+      onSubmit(values);
+    },
     validate: (values) => {
       let errors = {};
       let stackErrors = [];
-
+    
       values.stacks.forEach((stack, index) => {
         let stackError = {};
         if (stack.stacked > stack.boxes) {
@@ -98,33 +99,19 @@ const PaletteForm = ({ onSubmit }) => {
           stackErrors[index] = stackError;
         }
       });
-
+    
       if (stackErrors.length > 0) {
         errors.stacks = stackErrors;
       }
-
-      let totalStacked = values.stacks.reduce(
-        (total, stack) => total + (stack.stacked || 0),
-        0
-      );
+    
+      let totalStacked = values.stacks.reduce((total, stack) => total + (stack.stacked || 0), 0);
       if (totalStacked > 98) {
-        errors.totalStacked =
-          "The total of boxes exceeds the maximum allowed (98)";
+        errors.totalStacked = 'The total of boxes exceeds the maximum allowed (98)';
       }
-
+    
       return errors;
-    },
-    onSubmit: (values) => {
-      // Pass the form data up to the parent component
-      console.log("Palette Form submitted, in formik handler. Values:");
-      console.log(values);
-      onSubmit(values);
-    },
+    }
   });
-
-  const handlePalletNumberChange = (event) => {
-    formik.setFieldValue("palletNumber", event.target.value);
-  };
 
   const handleSetPalet = () => {
     if (formik.values.palletNumber && formik.values.location === "vloer") {
@@ -135,22 +122,17 @@ const PaletteForm = ({ onSubmit }) => {
     }
   };
 
-  //todo: update to use formik - state, and also check reference to location throughout to use formik state
-  const handleLocationChange = (event) => {
-    formik.setFieldValue("location", event.target.value);
-  };
-
   const handleStackSelection = (event, index) => {
     const selectedStackId = event.target.value;
     const stackData = dummyStacks.find((stack) => stack.id === selectedStackId);
     if (stackData) {
-      formik.setFieldValue(stacks[`${index}`], { ...stackData, stacked: 0 });
+      formik.setFieldValue(`stacks[${index}]`, { ...stackData, stacked: 0 });
     }
   };
 
   const handleBoxCountChange = (event, index) => {
     const value = parseInt(event.target.value, 10) || 0;
-    formik.setFieldValue(stacks[`${index}`].stacked, value);
+    formik.setFieldValue(`stacks[${index}].stacked`, value);
   };
 
   const handleAddStack = () => {
@@ -180,12 +162,14 @@ const PaletteForm = ({ onSubmit }) => {
     formik.setFieldValue("stacks", updatedStacks);
   };
 
+  
   const handleUnstack = (index) => {
     const currentStack = formik.values.stacks[index];
     if (currentStack.stacked > 0) {
-      formik.setFieldValue(stacks[`${index}`].stacked, 0);
+      formik.setFieldValue(`stacks[${index}].stacked`, 0);
     }
   };
+ 
 
   const renderSelectedStacks = () => {
     return formik.values.stacks.map((stack, index) => (
@@ -213,8 +197,7 @@ const PaletteForm = ({ onSubmit }) => {
           {!showSections && (
             <Grid item xs={12}>
               <Paper elevation={3} sx={{ p: 1, minHeight: "100%" }}>
-                <Grid item xs={12}></Grid>
-                <Grid
+                <Grid item
                   container
                   direction="column"
                   justifyContent="space-between"
@@ -238,8 +221,6 @@ const PaletteForm = ({ onSubmit }) => {
                     helperText={
                       formik.touched.palletNumber && formik.errors.palletNumber
                     }
-                    //value={palletNumber}
-                    //onChange={handlePalletNumberChange}
                     sx={{ m: 2 }}
                   />
                   <FormControl component="fieldset">
@@ -250,7 +231,7 @@ const PaletteForm = ({ onSubmit }) => {
                       row
                       name="location"
                       value={formik.values.location}
-                      onChange={handleLocationChange}
+                      onChange={formik.handleChange}
                       sx={{ m: 2 }}
                     >
                       <FormControlLabel
@@ -356,14 +337,14 @@ const PaletteForm = ({ onSubmit }) => {
                     justifyContent="space-between"
                     alignItems="center"
                   >
-                    <div item xs={3}>
+                    <Grid item xs={3}>
                       # {palletNumber}
-                    </div>
-                    <div item xs={9}>
+                    </Grid>
+                    <Grid item xs={9}>
                       <Typography variant="body1" sx={{ mt: 2 }}>
                         {totalStacked} / 98 Bokse, {totalRemaining} oor
                       </Typography>
-                    </div>
+                    </Grid>
                   </Grid>
                 </Paper>
               </Grid>
@@ -387,14 +368,11 @@ const PaletteForm = ({ onSubmit }) => {
                         <Grid item xs={6}>
                           <FormControl fullWidth>
                             <Select
-                              //value={stack.id}
-                              //onChange={(e) => handleStackChange(e, index)}
                               value={formik.values.stacks[index].id}
                               onChange={(event) =>
                                 handleStackSelection(event, index)
                               }
                               displayEmpty
-                              //inputProps={{ "aria-label": "Select stack" }}
                             >
                               <MenuItem value="" disabled>
                                 Select stack
@@ -412,13 +390,11 @@ const PaletteForm = ({ onSubmit }) => {
                         <Grid item xs={1}>
                           <TextField
                             fullWidth
-                            id={stacks[`${index}`].stacked}
-                            name={stacks[`${index}`].stacked}
+                            id={`stacks[${index}].stacked`}
+                            name={`stacks[${index}].stacked`}
                             value={formik.values.stacks[index].stacked}
-                            //name="boxCount"
                             label="Boxes"
                             type="number"
-                            //value={stack.stacked}
                             onChange={(e) => handleBoxCountChange(e, index)}
                             error={
                               formik.touched.stacks?.[index]?.stacked &&
@@ -434,7 +410,7 @@ const PaletteForm = ({ onSubmit }) => {
                               {formik.errors.totalStacked}
                             </Typography>
                           )}
-                          {formik.errors.stacked && (
+                           {formik.errors.stacked && (
                             <Typography color="error" variant="body2">
                               {formik.errors.stacked}
                             </Typography>
@@ -496,11 +472,6 @@ const PaletteForm = ({ onSubmit }) => {
       </form>
     </Box>
 
-    /*
-    <form onSubmit={formik.handleSubmit}>
-      
-    </form>
-*/
   );
 };
 

@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 import { EntityHeader } from "../components/common/EntityHeader";
 import { useNavigate } from "react-router-dom";
 import { entityTableMapping } from "../utility/entityTableMapping";
+import { fetchEntityTableData } from "../services/entityService";
 
 const EntityShowPage = () => {
   const { entity } = useParams();
@@ -12,6 +13,8 @@ const EntityShowPage = () => {
   console.log("1 entity showpage:", entity);
   const navigate = useNavigate();
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const EntityTableComponent = entityTableMapping[entity] || {
     columns: [],
     data: [],
@@ -28,18 +31,19 @@ const EntityShowPage = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/${entity}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      console.log("data in showpage:", data);
-      setData(data); // Update the state with the fetched data
+      setLoading(true);
+      const tableData = await fetchEntityTableData(entity);
+      console.log(`Fetched data for ${entity}:`, tableData);
+      setData(tableData);
+      setLoading(false);
     } catch (error) {
-      console.error("Could not fetch data:", error);
-      // Handle error state as appropriate
+      console.error(`Error fetching table data for ${entity}:`, error);
+      setError(error.message);
+      setLoading(false);
     }
   };
+
+  // Fetch data on component mount or when the entity changes
   useEffect(() => {
     fetchData();
   }, [entity]);
